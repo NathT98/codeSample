@@ -1,0 +1,430 @@
+/*------------------------------------------------------------------------------------- GLOBAL VARIABLES -------------------------------------------------------------------------------------*/
+
+int complete = 2;
+int minigameComplete = 0;
+int score = 0;
+unsigned char testSel = TEST_VECT_INTR;
+int Button_Flag;
+int taskNo = 0;
+int loopCount = 1;
+int c;
+int current;
+
+/*------------------------------------------------------------------------------------- MUSICAL NOTES --------------------------------------------------------------------------------------------*/
+
+	double lowA = 110.000;
+	double lowAS = 116.541;
+	double lowB = 123.471;
+	double lowC = 130.813;
+	double lowCS = 138.591;
+	double lowD = 146.832;
+	double lowDS = 155.563;
+	double lowE = 164.814;
+	double lowF = 174.614;
+	double lowFS = 184.997;
+	double lowG = 195.998;
+	double lowGS = 207.652;
+	double middleA = 220.000;
+	double middleAS = 233.082;
+	double middleB = 246.942;
+	double middleC = 261.6;
+	double middleCS = 277.183;
+	double middleD = 293.665;
+	double middleDS = 311.127;
+	double middleE = 329.628;
+	double middleF = 349.228;
+	double middleFS = 369.994;
+	double middleG = 391.995;
+	double middleGS = 415.305;
+	double evenHigherA = 880.000;
+	double evenHigherCS = 1108.500;
+
+/*-----------------------------------------------------------------------*
+ Run a game
+ *-----------------------------------------------------------------------*/
+	
+//addScore occurs every time the user gets an action correct, so as well as adding to score, it notifies the user that they were correct
+void addScore(){
+	GLCD_DisplayString(4, 0, __FI, "      Correct       ");
+	//Adds 1 to score variable
+	score = score+1;
+	//sets complete variable to 1
+	complete = 1;
+	//plays a little "ba-ding" noise to notify user they were correct in their action
+	generate_Tone_On_Speaker(evenHigherA, 20);
+	delay(50);
+	generate_Tone_On_Speaker(evenHigherCS, 20);
+	
+	//creates a small light display to further indicate that the user was correct in their action
+	LED_On(7);
+	LED_On(0);
+	delay(25);
+	LED_On(6);
+	LED_On(1);
+	delay(25);
+	LED_On(5);
+	LED_On(2);
+	LED_Off(7);
+	LED_Off(0);
+	delay(25);
+	LED_On(4);
+	LED_On(3);
+	LED_Off(6);
+	LED_Off(1);
+	delay(25);
+	LED_Off(5);
+	LED_Off(2);
+	delay(25);
+	LED_Off(4);
+	LED_Off(3);
+	delay(25);
+	LED_On(3);
+	LED_On(4);
+	delay(25);
+	LED_On(2);
+	LED_On(5);
+	delay(25);
+	LED_On(1);
+	LED_On(6);
+	LED_Off(3);
+	LED_Off(4);
+	delay(25);
+	LED_On(7);
+	LED_On(0);
+	LED_Off(5);
+	LED_Off(2);
+	delay(25);
+	LED_Off(6);
+	LED_Off(1);
+	delay(25);
+	LED_Off(7);
+	LED_Off(0);
+}
+
+/*-----------------------------------------------------------------------*
+Game over
+ *-----------------------------------------------------------------------*/
+	
+//when the user performs an incorrect action this runs to notify them that they lost
+void gameOver(){
+	//sets up an array for the score
+	char output[5];
+	sprintf(output, "%d", score);
+	
+	//sets a display up to notify the user that they have lost, displays their score and how they can restart the game
+	GLCD_DisplayString(4, 0, __FI, "     GAME OVER      ");
+	GLCD_DisplayString(5, 0, __FI, "                    ");
+	GLCD_DisplayString(6, 0, __FI, "    press reset     ");
+	GLCD_DisplayString(7, 0, __FI, "   to start again   ");
+	GLCD_DisplayString(9, 0, __FI, "  Your score = ");
+	//Displays the score and outputs it
+	GLCD_DisplayString(9, 16, __FI, output);
+	
+	//plays a small tune and LED show to notify the user that they lost and it is Game Over
+	generate_Tone_On_Speaker(middleCS, 50);
+	LED_On(7);
+	delay(10);
+	generate_Tone_On_Speaker(middleC, 50);
+	LED_On(6);
+	delay(10);
+	generate_Tone_On_Speaker(middleB, 50);
+	LED_On(5);
+	delay(10);
+	generate_Tone_On_Speaker(middleAS, 50);
+	LED_On(4);
+	delay(10);
+	generate_Tone_On_Speaker(middleA, 50);
+	LED_On(3);
+	delay(10);
+	generate_Tone_On_Speaker(lowGS, 50);
+	LED_On(2);
+	delay(10);
+	generate_Tone_On_Speaker(lowG, 50);
+	LED_On(1);
+	delay(10);
+	generate_Tone_On_Speaker(lowFS, 50);
+	LED_On(0);
+	delay(10);
+	generate_Tone_On_Speaker(lowF, 50);
+	LED_Off(7);
+	delay(10);
+	generate_Tone_On_Speaker(lowE, 50);
+	LED_Off(6);
+	delay(10);
+	generate_Tone_On_Speaker(lowDS, 50);
+	LED_Off(5);
+	delay(10);
+	generate_Tone_On_Speaker(lowD, 50);
+	LED_Off(4);
+	delay(10);
+	generate_Tone_On_Speaker(lowCS, 50);
+	LED_Off(3);
+	delay(10);
+	generate_Tone_On_Speaker(lowC, 50);
+	LED_Off(2);
+	delay(10);
+	generate_Tone_On_Speaker(lowB, 50);
+	LED_Off(1);
+	delay(10);
+	generate_Tone_On_Speaker(lowAS, 50);
+	LED_Off(0);
+	delay(10);
+	generate_Tone_On_Speaker(middleB, 100);
+	All_LEDs_On();
+	delay(5);
+	All_LEDs_Off();
+	delay(5);
+	generate_Tone_On_Speaker(middleB, 100);
+	All_LEDs_On();
+	delay(5);
+	All_LEDs_Off();
+
+//The game would reset automatically for no reason... so a very long delay was created to avoid this
+	delay(100000);
+}
+ 
+/*-----------------------------------------------------------------------*
+	Function that generates flick it command
+ *-----------------------------------------------------------------------*/
+
+//function to control the flick it minigame of the game. if the analogue stick is flicked in any direction, the user moves on
+//if the user performs any other task, they lose
+void 	flickIt(){
+	 
+	//sets minigame complete vairable to 0
+	minigameComplete = 0;
+	//displays the flick it instruction on the screen
+	GLCD_DisplayString(4, 0, __FI, "Flick It       ");
+		
+	//while the minigame has not been completed, keep checking for if the analogue stick is pressed
+	while(minigameComplete==0){
+		switch(joystick_int){
+			//if the joystick is flicked up then minigame complete sets to 1 and addscore function is run
+		case JOYSTICK_UP:
+			joystick_int=0;
+			addScore();
+			minigameComplete=1;
+		break;
+		//if the joystick is flicked down then minigame complete sets to 1 and addscore function is run
+		case JOYSTICK_DOWN:
+			joystick_int=0;
+			addScore();
+			minigameComplete=1;
+		break;
+		//if the joystick is flicked left then minigame complete sets to 1 and addscore function is run
+		case JOYSTICK_LEFT:
+			joystick_int=0;
+			addScore();
+			minigameComplete=1;
+		break;
+		//if the joystick is flicked right then minigame complete sets to 1 and addscore function is run
+		case JOYSTICK_RIGHT:
+			joystick_int=0;
+			addScore();
+			minigameComplete=1;
+		break;
+		//if the joystick is pressed then the minigame complete sets to 1 and gameOver function is run
+		case JOYSTICK_SELECT:
+			joystick_int=0;
+			gameOver();
+			minigameComplete=1;
+		}
+		//if the bop it button is pressed then the gameOver function is run
+		if (user_btn_int == 1) {
+			gameOver();
+			user_btn_int=0;
+		}
+	}
+}
+
+/*-----------------------------------------------------------------------*
+	Function that generates bop it command
+ *----------------------------------------------------------------------*/
+//function to control the bop it minigame of the game. if the user button is pressed, the user moves on
+//if the user performs any other task, they lose
+void 	button_pressIt(){
+	
+	//sets minigame complete vairable to 0
+	minigameComplete = 0;
+	//displays the Bop it instruction on the screen
+	GLCD_DisplayString(4, 0, __FI, "Bop It       ");
+	
+	//if any action with a joystick is performed then the game over function is run
+	while(minigameComplete==0){
+		switch(joystick_int){
+		case JOYSTICK_SELECT:
+		joystick_int=0;
+		gameOver();
+		break;
+		case JOYSTICK_UP:
+		joystick_int=0;
+		gameOver();
+		break;
+		case JOYSTICK_DOWN:
+		joystick_int=0;
+		gameOver();
+		break;
+		case JOYSTICK_LEFT:
+		joystick_int=0;
+		gameOver();
+		break;
+		case JOYSTICK_RIGHT:
+		joystick_int=0;
+		gameOver();
+		break;
+	}
+	//if the user presses the user button then the minigame is complete and the addscore function is run and minigame complete variable is set to 1
+	if (user_btn_int == 1) {
+		addScore();
+		minigameComplete = 1;
+		user_btn_int=0;
+		loopCount += 1;
+		}
+	}
+}
+
+/*------------------------------------------------------------------------*
+	Function that generates twist it command
+ *-----------------------------------------------------------------------*/
+
+//function to control the turn it minigame of the game. if the analogue twister is turned, the user moves on
+//if the user performs any other task, they lose
+void 	turnIt(){
+	
+	//displays the Turn it instruction on the screen
+	GLCD_DisplayString(4, 0, __FI, "Turn It       ");
+	ADC1->CR2 |= (1UL << 22);       		//Start the ADC conversion
+	
+	//selects the last position of the device to two variables
+	current = (AD_last >> 8) + 4;
+	c = (AD_last >> 8) + 4;
+	
+	//while the two above variables are the same keep running the task
+	while (current == c) {
+			
+		if (AD_done == 1) {
+			//Yes, so get part of the sample value
+			current = (AD_last >> 8) + 4;
+			ADC1->CR2 |= (1UL << 22);   	//Start the next ADC conversion
+		}
+		
+		//if any action with a joystick is performed then the game over function is run
+		while(minigameComplete==0){
+			switch(joystick_int){
+			case JOYSTICK_SELECT:
+			joystick_int=0;
+			gameOver();
+			break;
+			case JOYSTICK_UP:
+			joystick_int=0;
+			gameOver();
+			break;
+			case JOYSTICK_DOWN:
+			joystick_int=0;
+			gameOver();
+			break;
+			case JOYSTICK_LEFT:
+			joystick_int=0;
+			gameOver();
+			break;
+			case JOYSTICK_RIGHT:
+			joystick_int=0;
+			gameOver();
+			break;
+			}
+			//if the bop it button is pressed then the gameOver function is run
+			if (user_btn_int == 1) {
+				gameOver();
+				user_btn_int=0;
+			}
+		}
+	}
+	//if the two variables of the last position are not the same, then the user has turned the diall and add score function is run
+	if(current!=c){
+		addScore();
+	}
+}
+
+/*-----------------------------------------------------------------------*
+	Function that generates analog press it command
+ *-----------------------------------------------------------------------*/
+
+//the final function for minigames to control the analogue press it minigame. if the user presses the analog stick they win the minigame
+//if the user performs any other action they will lose
+void 	analog_pressIt(){
+	
+	//sets minigame complete vairable to 0
+	minigameComplete = 0;
+	//displays the Press it instruction on the screen
+	GLCD_DisplayString(4, 0, __FI, "Press It      ");
+	
+	//if the analogue stick is pressed then add score function runs
+	while(minigameComplete==0){
+		switch(joystick_int){
+		case JOYSTICK_SELECT:
+			joystick_int=0;
+			addScore();
+			minigameComplete=1;
+		break;
+		//if any other function with the analogue stick is performed, the user loses and game over function is run
+		case JOYSTICK_UP:
+			joystick_int=0;
+			gameOver();
+		break;
+		case JOYSTICK_DOWN:
+			joystick_int=0;
+			gameOver();
+		break;
+		case JOYSTICK_LEFT:
+			joystick_int=0;
+			gameOver();
+		break;
+		case JOYSTICK_RIGHT:
+			joystick_int=0;
+			gameOver();
+		break;
+		}
+		//if the user presses the bop it button the game over function is run
+		if (user_btn_int == 1) {
+				gameOver();
+				user_btn_int=0;
+		}
+	}
+}
+/*-----------------------------------------------------------------------*
+  run a game
+ *-----------------------------------------------------------------------*/
+
+//runs a random number generator for numbers between 0 and 3 to decide which minigame is next
+void runGame(){	
+	
+	//creates a variable to remember the last task that was set
+	int lastTask = taskNo;
+	
+	//an array to display the score
+	char output[5];
+	sprintf(output, "%d", score);
+	
+	//sets complete to 0
+	complete = 0;
+	
+	//shows the score on screen
+	GLCD_DisplayString(5, 0, __FI, "Score = ");
+	GLCD_DisplayString(5, 9, __FI, output);
+	
+	//keeps looking for a random number until a new one is found
+	while(lastTask == taskNo){
+		taskNo = rand()%4;
+	}
+	
+	//chooses which minigame to run based on the random number generated
+	if(taskNo==0){
+		flickIt();		
+	}else if(taskNo==1){
+		button_pressIt();
+	}else if(taskNo==2){
+		turnIt();
+	}else if(taskNo==3){
+		analog_pressIt();
+	}
+}	
