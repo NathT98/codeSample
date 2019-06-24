@@ -1,0 +1,218 @@
+package jfl;
+
+//imports none default packages for use in the class
+import connection.JFLConnection;
+import javax.swing.*;
+
+/**
+ *
+ * @author nathanthomas
+ */
+//this class will allow new teams to be added to the database
+//strings within the text boxes on the form will be turned into data variables
+//these are passes to JFL connection class
+//there the add statement will be adapted to contain those data variables
+//meaning the data input by user will be stored on the teams DB.
+public class AddTeam extends javax.swing.JFrame {
+
+    //method to initialise the form
+    public AddTeam() {
+        initComponents();
+    }
+    
+    //variables to hold the data input by the user
+    String teamName;
+    String player1;
+    String player2;
+    String player3;
+    String player4;
+    String player5;
+    String player6;
+    String player7;
+    String player8;
+    String player9;
+    String player10;
+    String player11;
+    String substitute1;
+    String substitute2;
+    String manager;
+    String coach;
+    Integer points;
+
+//Setting text within the form within labels and text boxes
+btnCancel.setText("Cancel");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        btnAddTeam.setText("Add Team");
+        btnAddTeam.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddTeamActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setText("Player 1 (Captain):");
+
+        jLabel2.setText("Player 2:");
+
+        jLabel3.setText("Player 4:");
+
+        jLabel4.setText("Player 3:");
+
+        jLabel5.setText("Player 6:");
+
+        jLabel6.setText("Player 5:");
+
+        jLabel7.setText("Player 8:");
+
+        jLabel8.setText("Player 7:");
+
+        jLabel9.setText("Player 10:");
+
+        jLabel10.setText("Player 9:");
+
+        jLabel12.setText("Player 11:");
+
+        jLabel11.setText("Team Name:");
+
+        jLabel13.setText("Manager:");
+
+        jLabel14.setText("Coach:");
+
+        jLabel15.setText("Substitute 2:");
+
+        jLabel16.setText("Substitute 1:");
+
+//method for when add team button is pressed
+    private void btnAddTeamActionPerformed(java.awt.event.ActionEvent evt){
+        //sets previously created variables 
+        //to data taken from within the specified text area added by the user
+        //all variables represents the data held for one new team
+        teamName = txtTeamName.getText();
+        player1 = txtPlayer1.getText();
+        player2 = txtPlayer2.getText();
+        player3 = txtPlayer3.getText();
+        player4 = txtPlayer4.getText();
+        player5 = txtPlayer5.getText();
+        player6 = txtPlayer6.getText();
+        player7 = txtPlayer7.getText();
+        player8 = txtPlayer8.getText();
+        player9 = txtPlayer9.getText();
+        player10 = txtPlayer10.getText();
+        player11 = txtPlayer11.getText();
+        substitute1 = txtSubstitute1.getText();
+        substitute2 = txtSubstitute2.getText();
+        manager = txtManager.getText();
+        coach = txtCoach.getText();
+        points = 0;
+        
+            
+        //validation to ensure the user has input data into every text field
+        if(teamName.equals("") || player1.equals("") || player2.equals("") || player3.equals("") || player4.equals("") || player5.equals("") || player6.equals("") || player7.equals("") || player8.equals("") || player9.equals("") || player10.equals("") || substitute1.equals("") || substitute2.equals("") || manager.equals("") || coach.equals("")){
+            //relevant error message output to user 
+            JOptionPane.showMessageDialog(null, "ensure data is entered in every text field");    
+            //all data is input
+        }else{ 
+            //creates a new connection
+            JFLConnection jflc = new JFLConnection("JFL");
+            
+            //passes team data to JFL connection class
+            //the insert statement there will be altered to hold the data passed
+            //this team will be stored on the database
+            jflc.insertRecord(teamName, player1, player2, player3, player4, player5, player6, player7, player8, player9, player10, player11, substitute1, substitute2, manager, coach, points);
+            jflc.printAllRecords(null);
+            jflc.closeConnection();
+            
+            //message to user to show the new team was added
+            JOptionPane.showMessageDialog(null, teamName + " was added.");
+            
+
+//this section clears the form for next use
+            txtTeamName.setText("");
+            txtPlayer1.setText("");
+            txtPlayer2.setText("");
+            txtPlayer3.setText("");
+            txtPlayer4.setText("");
+            txtPlayer5.setText("");
+            txtPlayer6.setText("");
+            txtPlayer7.setText("");
+            txtPlayer8.setText("");
+            txtPlayer9.setText("");
+            txtPlayer10.setText("");
+            txtPlayer11.setText("");
+            txtSubstitute1.setText("");
+            txtSubstitute2.setText("");
+            txtManager.setText("");
+            txtCoach.setText("");
+        }
+    }
+
+    package connection;
+
+    //importing correct java packages for use within the class
+    import java.awt.Component;
+    import java.sql.*;
+    import javax.swing.*;
+
+    //this class will handle the statements passed to the database refering to the JFL data
+    //for example adding teams to the team database.
+    //this classes methods can be used from other classes over and over
+    //therefore not needed to be typed again.
+    public class JFLConnection extends DBConnection{
+
+        private Component frame;
+
+        //method to establish database connection
+        public JFLConnection(final String dbName){
+            this.connectDatabase(dbName);
+        }
+
+//this method defines a statement for adding a team record to the database
+    public void insertRecord(final String TeamName, final String Player1, final String Player2, final String Player3, final String Player4, final String Player5, final String Player6, final String Player7, final String Player8, final String Player9, final String Player10, final String Player11, final String Substitute1, final String Substitute2, final String Manager, final String Coach, final Integer Points){
+        //defines an insert statement to be used on the database, with question marks to be updated later
+        final String insertStmt = "INSERT INTO team (TeamName, Player1, Player2, Player3, Player4, Player5, Player6, Player7, Player8, Player9, Player10, Player11, Substitute1, Substitute2, Manager, Coach, Points) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        //creates simple select statement to view the team by that name stored in the database
+        final String selectStmt = "SELECT * FROM team Where TeamName=?";
+        try{
+            //creates a new instance of the select statement
+            PreparedStatement pstmtSelect = getConnection().prepareStatement(selectStmt); 
+            //carries out setting variables within the statement (question marks)
+            //passed into by another class
+            pstmtSelect.setString(1, TeamName);
+            //sets result to the found record
+            ResultSet result = pstmtSelect.executeQuery(); 
+            //if no record is found in result carry out this code
+            if(!result.next()){
+                //creates a new instance of the insert statement
+                PreparedStatement pstmt = getConnection().prepareStatement(insertStmt); 
+                //carries out setting variables within the statement (question marks)
+                //passed into by another class
+                pstmt.setString(1, TeamName);
+                pstmt.setString(2, Player1);
+                pstmt.setString(3, Player2);
+                pstmt.setString(4, Player3);
+                pstmt.setString(5, Player4);
+                pstmt.setString(6, Player5);
+                pstmt.setString(7, Player6);
+                pstmt.setString(8, Player7);
+                pstmt.setString(9, Player8);
+                pstmt.setString(10, Player9);
+                pstmt.setString(11, Player10);
+                pstmt.setString(12, Player11);
+                pstmt.setString(13, Substitute1);
+                pstmt.setString(14, Substitute2);
+                pstmt.setString(15, Manager);
+                pstmt.setString(16, Coach);
+                pstmt.setInt(17, Points);
+                //carries out updated statement 
+                pstmt.executeUpdate();   
+            }
+        //if record exists or cannot be entered throw this error   
+        }catch(SQLException sqle){
+            System.out.println("Exception when insterting team record" + sqle.toString());
+        }
+    }
+
